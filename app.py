@@ -8,6 +8,7 @@ import numpy as np
 from datetime import datetime as dt
 import plotly.express as px
 import nltk
+import os
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
