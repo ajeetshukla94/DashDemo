@@ -98,7 +98,7 @@ app.layout = html.Div(style={'backgroundColor':'white'},children=[
         
         html.Div(children=[
     
-        html.Label('Total Conversastion', style={'paddingTop': '.3rem','text-align': 'center','font-size': '25px'}),
+        html.Label('Total Conversastion', style={'text-align': 'center','font-size': '25px'}),
         html.H4(id='id1', style={'fontWeight': 'bold','text-align': 'center'}),
         html.Br(),
         
@@ -112,7 +112,8 @@ app.layout = html.Div(style={'backgroundColor':'white'},children=[
                      multi=True,placeholder="Filter by gender :",style=drop_down_css),
         html.Br(),  
         html.Label('Age', style=label_css),
-        dcc.RangeSlider(id='Age',value=[min_age,max_age ],marks={i:str(i)+"Y" for i in range(min_age,max_age+1,10)},),
+        dcc.RangeSlider(min_age, max_age, 10, value=[min_age, max_age], id='Age'),
+        #dcc.RangeSlider(id='Age',value=[min_age,max_age ],marks={i:str(i)+"Y" for i in range(min_age,max_age+1,10)},),
         
        
     ], className="three columns",style={'padding':'2rem', 'margin':'1rem', 
