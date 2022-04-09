@@ -18,8 +18,12 @@ server = app.server
 complaint_df           = pd.read_csv(os.path.join("static/inputData/","complaints_processed.csv"))
 unq_product            = complaint_df['product'].unique().tolist()
 unq_Gender             = ['Male','Female']
-complaint_df['Gender'] = np.random.choice(unq_Gender,size=len(complaint_df))
+complaint_df['Gender'] = np.random.choice(unq_Gender,size=len(complaint_df),p=[0.35,0.65])
+complaint_df['Age']    = np.random.choice(list(range(20,70)),size=len(complaint_df))
 colums_list            = {'Gender':'Gender','Product':'product'}
+colums_list            = {'Gender':'Gender','product':'product'}
+min_age                = complaint_df['Age'].min()
+max_age                = complaint_df['Age'].max()
 
 drop_down_css    = {'background':'white','text':'white','font-size': '18px'}
 label_css        = {'background':'white','text':'#0066ff','text-align': 'center','font-weight': 'bold','font-size': '20px'}
@@ -84,10 +88,20 @@ df_copy = complaint_df.iloc[0:50]
 app.layout = html.Div(style={'backgroundColor':'white'},children=[ 
     
     
+    html.Div(children=[
+        html.H2(children='Complaint Dashboard')
+    ], style={'textAlign': 'center'}),
+    
+    
     ################### Filter box ###################### 
     html.Div(children=[
         
         html.Div(children=[
+    
+        html.Label('Total Conversastion', style={'paddingTop': '.3rem','text-align': 'center','font-size': '25px'}),
+        html.H4(id='id1', style={'fontWeight': 'bold','text-align': 'center'}),
+        html.Br(),
+        
             
         html.Label('Filter by Product',style=label_css),       
         dcc.Dropdown(id='product_type',options=[{'label': i, 'value': i}for i in unq_product],
@@ -98,7 +112,8 @@ app.layout = html.Div(style={'backgroundColor':'white'},children=[
                      multi=True,placeholder="Filter by gender :",style=drop_down_css),
         html.Br(),        
         html.Label('Age', style=label_css),
-        dcc.RangeSlider(id='Age',step=10,value=[20, 70],marks={i:str(i)+"Y" for i in range(20,71,5)},),       
+        dcc.RangeSlider(id='Age',value=[min_age,max_age],),  
+       
     ], className="three columns",style={'padding':'2rem', 'margin':'1rem', 
                                         'boxShadow': '#e3e3e3 4px 4px 2px', 
                                         'border-radius': '10px', 'marginTop': '2rem'} ),
@@ -107,18 +122,18 @@ app.layout = html.Div(style={'backgroundColor':'white'},children=[
         
         
     html.Div(children=[
-        html.Div(children=[
-            
-                html.Div(children=[html.Label('Filter by gender :',style=label_css)],
-                     className="six columns number-stat-box"),
-            
-                html.Div(children=[html.Label('Filter by gender :',style=label_css)],
-                     className="six columns number-stat-box"),
         
         
+#         html.Div(children=[           
+                          
+#                 html.Div(children=[
+#                     html.H3(id='id1', style={'fontWeight': 'bold'}),
+#                     html.Label('Total Conversastion', style={'paddingTop': '.3rem'}),
+#                 ], className="six columns number-stat-box"),  
+        
             
-        ],style={'margin-bottom':'1rem','display':'flex','width':"100%",
-                 'flex-wrap':'wrap','justify-content':'space-between'}),
+#         ],style={'margin-bottom':'1rem','display':'flex','width':"100%",
+#                  'flex-wrap':'wrap','justify-content':'space-between'}),
         
         
         html.Div(children=[
@@ -149,9 +164,12 @@ app.layout = html.Div(style={'backgroundColor':'white'},children=[
                 ]),
                 
                 
-                dcc.Tab(label="NLP",children=[               
+                dcc.Tab(label="Narrative Overview",children=[               
                     
                   html.Div(children=[
+                      
+                      html.Br(),
+                      html.Label('Keyword Distrbution',style=label_css),
                       dcc.Graph(id="wordbarchart"),
                                      ],style=table_scroll_css, className="twleve columns"),
                 ]),
@@ -170,22 +188,26 @@ app.layout = html.Div(style={'backgroundColor':'white'},children=[
 
 
 @app.callback(
+    dash.dependencies.Output('id1','children'),    
     dash.dependencies.Output('samleData','children'),    
     dash.dependencies.Output('distributionData','children'), 
     dash.dependencies.Output('barchart','figure'), 
     dash.dependencies.Output('wordbarchart','figure'),     
     [dash.dependencies.Input('product_type','value')],
     [dash.dependencies.Input('gender','value')],
+    [dash.dependencies.Input('Age','value')],
     [dash.dependencies.Input('selected_column','value')]
 )
 
-def update_layout(product_type_val,gender_val,distribution_column):
+def update_layout(product_type_val,gender_val,age_val,distribution_column):
     
     df_copy = complaint_df.copy()    
     if product_type_val is not None:
-        df_copy = df_copy[df_copy['product'].isin(product_type_val)]        
+        if len(product_type_val)>0:
+            df_copy = df_copy[df_copy['product'].isin(product_type_val)]        
     if gender_val is not None:
-        df_copy = df_copy[df_copy['Gender'].isin(gender_val)]
+        if len(gender_val)>0:
+            df_copy = df_copy[df_copy['Gender'].isin(gender_val)]
         
     
     Data_1 = get_distribution_table(distribution_column,df_copy)
@@ -196,15 +218,15 @@ def update_layout(product_type_val,gender_val,distribution_column):
                        color=trn_df[distribution_column],y='counts',
                        text=trn_df['Percentage'].apply(lambda x: "{0:,}".format(x))) 
     
+    id1=df_copy.shape[0]
+    
     list_val=""
     for val in df_copy.iloc[0:50].narrative:
         list_val =list_val+" "+str(val)
     wordbarchart = get_word_frequency(list_val)  
-    Data_2 = get_dct_table(df_copy.iloc[0:50])              
-    return Data_2,Data_1,bar_chart,wordbarchart
     
-
-
+    Data_2 = get_dct_table(df_copy.iloc[0:50])              
+    return id1, Data_2,Data_1,bar_chart,wordbarchart
 if __name__ == '__main__':
     app.run_server(debug=True)
 
