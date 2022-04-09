@@ -110,9 +110,10 @@ app.layout = html.Div(style={'backgroundColor':'white'},children=[
         html.Label('Filter by Gender',style=label_css),
         dcc.Dropdown(id='gender',options=[{'label': i, 'value': i}for i in unq_Gender],
                      multi=True,placeholder="Filter by gender :",style=drop_down_css),
-        html.Br(),        
+        html.Br(),  
         html.Label('Age', style=label_css),
-        dcc.RangeSlider(id='Age',value=[min_age,max_age],),  
+        dcc.RangeSlider(id='Age',value=[min_age,max_age ],marks={i:str(i)+"Y" for i in range(min_age,max_age+1,10)},),
+        
        
     ], className="three columns",style={'padding':'2rem', 'margin':'1rem', 
                                         'boxShadow': '#e3e3e3 4px 4px 2px', 
