@@ -13,6 +13,9 @@ import os
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
+app = dash.Dash(__name__)
+server = app.server
+
 complaint_df           = pd.read_csv(os.path.join("static/inputData/","complaints_processed.csv"))
 unq_product            = complaint_df['product'].unique().tolist()
 unq_Gender             = ['Male','Female']
@@ -204,6 +207,5 @@ def update_layout(product_type_val,gender_val,distribution_column):
 
 
 if __name__ == '__main__':
-    #app.debug = True
-    app.run()
+    app.run_server(debug=True)
 
