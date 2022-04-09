@@ -1,0 +1,9 @@
+gunicorn
+numpy
+pandas
+xlrd
+XlsxWriter
+nltk
+plotly
+dash
+
