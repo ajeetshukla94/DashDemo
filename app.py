@@ -19,7 +19,7 @@ complaint_df           = pd.read_csv(os.path.join("static/inputData/","complaint
 unq_product            = complaint_df['product'].unique().tolist()
 unq_Gender             = ['Male','Female']
 complaint_df['Gender'] = np.random.choice(unq_Gender,size=len(complaint_df),p=[0.35,0.65])
-complaint_df['Age']    = np.random.choice(list(range(20,70)),size=len(complaint_df))
+complaint_df['Age']    = np.random.choice(list(range(20,71)),size=len(complaint_df))
 colums_list            = {'Gender':'Gender','Product':'product'}
 colums_list            = {'Gender':'Gender','product':'product'}
 min_age                = complaint_df['Age'].min()
@@ -112,8 +112,8 @@ app.layout = html.Div(style={'backgroundColor':'white'},children=[
                      multi=True,placeholder="Filter by gender :",style=drop_down_css),
         html.Br(),  
         html.Label('Age', style=label_css),
-        dcc.RangeSlider(min_age, max_age, 10, value=[min_age, max_age], id='Age'),
-        #dcc.RangeSlider(id='Age',value=[min_age,max_age ],marks={i:str(i)+"Y" for i in range(min_age,max_age+1,10)},),
+        #dcc.RangeSlider(min_age, max_age+1, 10, value=[min_age, max_age+1], id='Age'),
+        dcc.RangeSlider(id='Age',value=[min_age,max_age],marks={i:str(i)+"Y" for i in range(min_age,max_age,10)},),
         
        
     ], className="three columns",style={'padding':'2rem', 'margin':'1rem', 
