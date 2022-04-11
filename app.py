@@ -15,18 +15,15 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__)
 server = app.server
 
-complaint_df           = pd.read_csv(os.path.join("static/inputData/","complaints_processed.csv"))
-unq_product            = complaint_df['product'].unique().tolist()
+complaint_df           = pd.read_csv("complaints_processed.csv")
 unq_Gender             = ['Male','Female']
 complaint_df['Gender'] = np.random.choice(unq_Gender,size=len(complaint_df),p=[0.35,0.65])
-complaint_df['Age']    = np.random.choice(list(range(20,71)),size=len(complaint_df))
-colums_list            = {'Gender':'Gender','Product':'product'}
+unq_product            = complaint_df['product'].unique().tolist()
+unq_Gender             = complaint_df['Gender'].unique().tolist()
 colums_list            = {'Gender':'Gender','product':'product'}
-min_age                = complaint_df['Age'].min()
-max_age                = complaint_df['Age'].max()
 
 drop_down_css    = {'background':'white','text':'white','font-size': '18px'}
-label_css        = {'background':'white','text':'#0066ff','text-align': 'center','font-weight': 'bold','font-size': '20px'}
+label_css        = {'background':'white','text':'#0066ff','text-align': 'center','font-weight': 'bold','font-size': '15px'}
 table_cell_css   = {'padding': '5px', 'text-align': 'center',
                   'minWidth': '180px', 'width': '180px', 'maxWidth': '180px',
                     'overflow': 'hidden', 'textOverflow': 'ellipsis'} 
@@ -38,7 +35,6 @@ table_data_css   = {'color': 'black', 'backgroundColor': 'white',
                   'font-size': '12px', 'max-height': '50px'}
 table_label_css  = {'font-weight': "bold","text-align": "center", 'font-size': '25px'}
 table_scroll_css = {'overflow-y': 'scroll', 'overflow-x': 'scroll', 'flex-wrap': 'wrap'}
-
 
 def get_word_frequency(list_val,number_of_keyword=10):    
     allWords    = nltk.tokenize.word_tokenize(list_val)
@@ -82,6 +78,10 @@ def get_distribution_table(column_name, distribution_raw_data):
     distribution_raw_data=get_dct_table(distribution_raw_data)
     return distribution_raw_data
     
+
+    
+
+    
     
 df_copy = complaint_df.iloc[0:50]
 
@@ -98,10 +98,19 @@ app.layout = html.Div(style={'backgroundColor':'white'},children=[
         
         html.Div(children=[
     
-        html.Label('Total Conversastion', style={'text-align': 'center','font-size': '25px'}),
-        html.H4(id='id1', style={'fontWeight': 'bold','text-align': 'center'}),
-        html.Br(),
         
+        html.Br(),
+            
+        html.Div(children=[                             
+                html.Div(children=[
+                    html.Label('Total Conversastion', style={'paddingTop': '.3rem','text-align': 'center','font-size': '20px'}),
+                    html.H4(id='id1', style={'fontWeight': 'bold','text-align': 'center'}),
+                ], className="twelve columns number-stat-box"),                      
+        ],style={'margin-bottom':'1rem','display':'flex','width':"100%",
+                 'flex-wrap':'wrap','justify-content':'space-between',
+                'boxShadow': '#e3e3e3 4px 4px 2px', 
+                 'border-radius': '10px', 'marginTop': '2rem'}),
+
             
         html.Label('Filter by Product',style=label_css),       
         dcc.Dropdown(id='product_type',options=[{'label': i, 'value': i}for i in unq_product],
@@ -110,11 +119,8 @@ app.layout = html.Div(style={'backgroundColor':'white'},children=[
         html.Label('Filter by Gender',style=label_css),
         dcc.Dropdown(id='gender',options=[{'label': i, 'value': i}for i in unq_Gender],
                      multi=True,placeholder="Filter by gender :",style=drop_down_css),
-        html.Br(),  
-        html.Label('Age', style=label_css),
-        #dcc.RangeSlider(min_age, max_age+1, 10, value=[min_age, max_age+1], id='Age'),
-        dcc.RangeSlider(id='Age',value=[min_age,max_age],marks={i:str(i)+"Y" for i in range(min_age,max_age,10)},),
-        
+        html.Br(),        
+
        
     ], className="three columns",style={'padding':'2rem', 'margin':'1rem', 
                                         'boxShadow': '#e3e3e3 4px 4px 2px', 
@@ -197,11 +203,10 @@ app.layout = html.Div(style={'backgroundColor':'white'},children=[
     dash.dependencies.Output('wordbarchart','figure'),     
     [dash.dependencies.Input('product_type','value')],
     [dash.dependencies.Input('gender','value')],
-    [dash.dependencies.Input('Age','value')],
     [dash.dependencies.Input('selected_column','value')]
 )
 
-def update_layout(product_type_val,gender_val,age_val,distribution_column):
+def update_layout(product_type_val,gender_val,distribution_column):
     
     df_copy = complaint_df.copy()    
     if product_type_val is not None:
@@ -213,7 +218,7 @@ def update_layout(product_type_val,gender_val,age_val,distribution_column):
         
     
     Data_1 = get_distribution_table(distribution_column,df_copy)
-    trn_df =  df_copy.groupby([distribution_column]).size().reset_index(name='counts') 
+    trn_df = df_copy.groupby([distribution_column]).size().reset_index(name='counts') 
     count_sum=trn_df.counts.sum()
     trn_df['Percentage'] =trn_df.counts.apply(lambda x:  100*x/float(count_sum)).values
     bar_chart = px.bar(trn_df,x=trn_df[distribution_column],
@@ -229,6 +234,12 @@ def update_layout(product_type_val,gender_val,age_val,distribution_column):
     
     Data_2 = get_dct_table(df_copy.iloc[0:50])              
     return id1, Data_2,Data_1,bar_chart,wordbarchart
+    
+    
+    
+    
+    
+    
 if __name__ == '__main__':
     app.run_server(debug=True)
 
