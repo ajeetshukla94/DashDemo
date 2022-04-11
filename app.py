@@ -36,6 +36,9 @@ table_data_css   = {'color': 'black', 'backgroundColor': 'white',
 table_label_css  = {'font-weight': "bold","text-align": "center", 'font-size': '25px'}
 table_scroll_css = {'overflow-y': 'scroll', 'overflow-x': 'scroll', 'flex-wrap': 'wrap'}
 
+
+    
+
 def get_word_frequency(list_val,number_of_keyword=10):    
     allWords    = nltk.tokenize.word_tokenize(list_val)
     allWordDist = nltk.FreqDist(w.lower() for w in allWords)
@@ -48,7 +51,12 @@ def get_word_frequency(list_val,number_of_keyword=10):
     df_fdist = df_fdist.reset_index()
     df_fdist.sort_values('Frequency',ascending=False,inplace=True)
     df_fdist=df_fdist.iloc[:number_of_keyword]
-    bar_chart = px.bar(df_fdist,x=df_fdist['Keyword'],color=df_fdist['Keyword'],y='Frequency',) 
+    
+    count_sum=df_fdist.Frequency.sum()
+    df_fdist['Percentage'] =df_fdist.Frequency.apply(lambda x:  100*x/float(count_sum)).values
+    bar_chart = px.bar(df_fdist,x=df_fdist['Keyword'],color=df_fdist['Keyword'],y='Frequency',
+                      text=df_fdist['Percentage'].apply(lambda x: "{0:1.2f}%".format(x)) )
+    bar_chart.update_traces(textfont_size=12,textangle=0,textposition="outside",cliponaxis=False)
     return bar_chart
     
 def get_dct_table(datatable):
@@ -77,10 +85,6 @@ def get_distribution_table(column_name, distribution_raw_data):
     distribution_raw_data.Count=distribution_raw_data.Count.apply(lambda x: "{0:,}".format(x) )    
     distribution_raw_data=get_dct_table(distribution_raw_data)
     return distribution_raw_data
-    
-
-    
-
     
     
 df_copy = complaint_df.iloc[0:50]
@@ -221,11 +225,16 @@ def update_layout(product_type_val,gender_val,distribution_column):
     trn_df = df_copy.groupby([distribution_column]).size().reset_index(name='counts') 
     count_sum=trn_df.counts.sum()
     trn_df['Percentage'] =trn_df.counts.apply(lambda x:  100*x/float(count_sum)).values
+    #trn_df['Percentage']=trn_df['Percentage'].round(2)
+    #trn_df['Percentage']=trn_df['Percentage'].astype(str)+"%"
     bar_chart = px.bar(trn_df,x=trn_df[distribution_column],
                        color=trn_df[distribution_column],y='counts',
-                       text=trn_df['Percentage'].apply(lambda x: "{0:,}".format(x))) 
+                       text=trn_df['Percentage'].apply(lambda x: "{0:1.2f}%".format(x))) 
+    bar_chart.update_traces(textfont_size=12,textangle=0,textposition="outside",cliponaxis=False)
+    
     
     id1=df_copy.shape[0]
+    id1="{0:,}".format(id1)
     
     list_val=""
     for val in df_copy.iloc[0:50].narrative:
@@ -234,11 +243,7 @@ def update_layout(product_type_val,gender_val,distribution_column):
     
     Data_2 = get_dct_table(df_copy.iloc[0:50])              
     return id1, Data_2,Data_1,bar_chart,wordbarchart
-    
-    
-    
-    
-    
+
     
 if __name__ == '__main__':
     app.run_server(debug=True)
