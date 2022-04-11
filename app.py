@@ -15,7 +15,7 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__)
 server = app.server
 
-complaint_df           = pd.read_csv("complaints_processed.csv")
+complaint_df           = pd.read_csv(os.path.join("static/inputData/","complaints_processed.csv"))
 unq_Gender             = ['Male','Female']
 complaint_df['Gender'] = np.random.choice(unq_Gender,size=len(complaint_df),p=[0.35,0.65])
 unq_product            = complaint_df['product'].unique().tolist()
